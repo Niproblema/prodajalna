@@ -205,11 +205,16 @@ streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
         zato računa ni mogoče pripraviti!</p>");
     }
     else {
-      odgovor.setHeader('content-type', 'text/xml');
-      odgovor.render('eslog', {
-        vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
-        postavkeRacuna: pesmi
-      })
+      vrniStrankoIDja(zahteva.session.seznamStrank, function(napaka, stranka) {
+        if (!napaka) {
+          odgovor.setHeader('content-type', 'text/xml');
+          odgovor.render('eslog', {
+            vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
+            postavkeRacuna: pesmi,
+            stranka: stranka[0]
+          })
+        }
+      });
     }
   })
 })
@@ -227,6 +232,15 @@ var vrniStranke = function(callback) {
     }
   );
 }
+
+var vrniStrankoIDja = function(strankaId, callback) {
+  pb.all("SELECT * FROM Customer WHERE Customer.CustomerId = " + strankaId,
+    function(napaka, vrstice) {
+      callback(napaka, vrstice);
+    }
+  );
+}
+
 
 // Vrni račune iz podatkovne baze
 var vrniRacune = function(callback) {
@@ -254,21 +268,15 @@ streznik.post('/prijava', function(zahteva, odgovor) {
     	  Phone, Fax, Email, SupportRepId) \
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
       //TODO: add fields and finalize
-<<<<<<< HEAD
       stmt.run(polja.FirstName, polja.LastName, polja.Company,
         polja.Address, polja.City, polja.State, polja.Country,
         polja.PostalCode, polja.Phone, polja.Fax, polja.Email, 3);
       stmt.finalize();
-=======
-      //stmt.run("", "", "", "", "", "", "", "", "", "", "", 3); 
-      //stmt.finalize();
->>>>>>> prikaz-racuna
     }
     catch (err) {
       napaka2 = true;
     }
 
-<<<<<<< HEAD
     if (napaka2) { //Neuspešna
       vrniRacune(function(napaka2, racuni) {
         vrniStranke(function(napaka1, stranke) {
@@ -291,10 +299,6 @@ streznik.post('/prijava', function(zahteva, odgovor) {
         });
       });
     }
-
-=======
-    odgovor.end();
->>>>>>> prikaz-racuna
   });
 })
 
@@ -314,13 +318,8 @@ streznik.get('/prijava', function(zahteva, odgovor) {
 // Prikaz nakupovalne košarice za stranko
 streznik.post('/stranka', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
-<<<<<<< HEAD
   form.parse(zahteva, function (napaka1, polja, datoteke) {
     zahteva.session.seznamStrank = polja.seznamStrank;
-=======
-
-  form.parse(zahteva, function(napaka1, polja, datoteke) {
->>>>>>> prikaz-racuna
     odgovor.redirect('/')
     
   });
@@ -328,12 +327,8 @@ streznik.post('/stranka', function(zahteva, odgovor) {
 
 // Odjava stranke
 streznik.post('/odjava', function(zahteva, odgovor) {
-<<<<<<< HEAD
     zahteva.session.seznamStrank = null;
     odgovor.redirect('/prijava') 
-=======
-  odgovor.redirect('/prijava')
->>>>>>> prikaz-racuna
 })
 
 
